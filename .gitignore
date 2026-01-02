@@ -27,6 +27,7 @@ out/
 # VS Code and VS
 .vscode/
 .vs/
+*.pdb
 
 # NuGet packages
 *.nupkg
