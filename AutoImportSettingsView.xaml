@@ -1,0 +1,71 @@
+﻿<UserControl x:Class="AutoImportPlugin.AutoImportSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:AutoImportPlugin"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="600">
+
+  <UserControl.Resources>
+    <local:ListToStringConverter x:Key="ListToStringConverter"/>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="20">
+      <TextBlock Text="Enter full folder paths to scan, separated by comma or new line: (i.e. C:/Path/To/Games)" Margin="0,0,0,5"/>
+
+      <TextBox Text="{Binding Settings.ScanFolders, Converter={StaticResource ListToStringConverter}}"
+               AcceptsReturn="True"
+               Height="100"
+               VerticalScrollBarVisibility="Auto"
+               Padding="5"/>
+
+      <TextBlock Text="Scans root and immediate subfolders only."
+                 FontStyle="Italic" Foreground="Gray" Margin="0,5,0,20"/>
+
+      <TextBlock Text="These games will be ignored in future scans:" Margin="0,0,0,5"/>
+
+      <ListBox ItemsSource="{Binding BlockedPathsUI}"
+               Height="150"
+               Background="{DynamicResource ControlBackgroundBrush}"
+               BorderBrush="{DynamicResource NormalBorderBrush}"
+               BorderThickness="1"
+               Padding="5"
+               ScrollViewer.VerticalScrollBarVisibility="Disabled">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid Margin="0,2">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+
+              <TextBlock Text="{Binding}"
+                         Foreground="{DynamicResource TextBrush}"
+                         VerticalAlignment="Center"
+                         ToolTip="{Binding}"
+                         TextTrimming="CharacterEllipsis"/>
+
+              <Button Grid.Column="1"
+                      Content="Remove"
+                      Command="{Binding DataContext.RemoveBlockCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding}"
+                      Margin="10,0,0,0"
+                      Padding="10,3"/>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <Separator Margin="0,20"/>
+
+      <Button Content="Scan"
+              Command="{Binding RescanCommand}"
+              Height="40"
+              HorizontalAlignment="Left"
+              Padding="20,0"/>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

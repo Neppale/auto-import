@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4FDF1E89-5BC3-4C72-8FDA-0D580E7A5D5F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AutoImportPlugin</RootNamespace>
+    <AssemblyName>AutoImport</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Playnite.SDK, Version=6.14.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PlayniteSDK.6.14.0\lib\net462\Playnite.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AutoImport.cs" />
+    <Compile Include="AutoImportSettings.cs" />
+    <Compile Include="AutoImportSettingsView.xaml.cs">
+      <DependentUpon>AutoImportSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GameSelectionWindow.xaml.cs">
+      <DependentUpon>GameSelectionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScannedGameWrapper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".vs\AutoImport.csproj.dtbcache.json" />
+    <None Include=".vs\AutoImport\copilot-chat\088b0af4\sessions\ed54d4ea-6ea1-496a-af69-768682250d9b" />
+    <None Include=".vs\AutoImport\CopilotIndices\17.12.53.23981\CodeChunks.db" />
+    <None Include=".vs\AutoImport\CopilotIndices\17.12.53.23981\CodeChunks.db-shm" />
+    <None Include=".vs\AutoImport\CopilotIndices\17.12.53.23981\CodeChunks.db-wal" />
+    <None Include=".vs\AutoImport\CopilotIndices\17.12.53.23981\SemanticSymbols.db" />
+    <None Include=".vs\AutoImport\CopilotIndices\17.12.53.23981\SemanticSymbols.db-shm" />
+    <None Include=".vs\AutoImport\CopilotIndices\17.12.53.23981\SemanticSymbols.db-wal" />
+    <None Include=".vs\AutoImport\FileContentIndex\03fb7344-7908-4f79-b771-f0fe2d26e0d0.vsidx" />
+    <None Include=".vs\AutoImport\FileContentIndex\1d96ebdf-c331-45b9-9457-8ddf05e68201.vsidx" />
+    <None Include=".vs\AutoImport\FileContentIndex\299f6e4a-3507-4787-8650-e97ca40d51ff.vsidx" />
+    <None Include=".vs\AutoImport\FileContentIndex\c388354d-942c-4661-8a19-2855f3b52d8a.vsidx" />
+    <None Include=".vs\AutoImport\FileContentIndex\f0e9ec78-4e1c-4bb7-a0d8-013fb8ef1009.vsidx" />
+    <None Include=".vs\AutoImport\v17\DocumentLayout.backup.json" />
+    <None Include=".vs\AutoImport\v17\DocumentLayout.json" />
+    <None Include=".vs\ProjectSettings.json" />
+    <None Include=".vs\slnx.sqlite" />
+    <None Include=".vs\VSWorkspaceState.json" />
+    <None Include="extension.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+    <None Include="packages\PlayniteSDK.6.14.0\.signature.p7s" />
+    <None Include="packages\PlayniteSDK.6.14.0\docs\readme.md" />
+    <None Include="packages\PlayniteSDK.6.14.0\PlayniteSDK.6.14.0.nupkg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Localization\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Page Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AutoImportSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GameSelectionWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages\PlayniteSDK.6.14.0\images\applogo.png" />
+    <Content Include="packages\PlayniteSDK.6.14.0\lib\net462\Playnite.SDK.dll" />
+    <Content Include="packages\PlayniteSDK.6.14.0\lib\net462\Playnite.SDK.xml" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(TargetDir)*" "$(ProjectDir)" /Y /I</PostBuildEvent>
+  </PropertyGroup>
+</Project>
