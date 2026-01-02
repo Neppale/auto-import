@@ -24,7 +24,7 @@
       <TextBlock Text="Scans root and immediate subfolders only."
                  FontStyle="Italic" Foreground="Gray" Margin="0,5,0,20"/>
 
-      <TextBlock Text="These games will be ignored in future scans:" Margin="0,0,0,5"/>
+      <TextBlock Text="These files will be ignored in future scans:" Margin="0,0,0,5"/>
 
       <ListBox ItemsSource="{Binding BlockedPathsUI}"
                Height="150"
