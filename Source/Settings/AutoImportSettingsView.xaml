@@ -57,15 +57,6 @@
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
-
-      <Separator Margin="0,20"/>
-
-      <Button Content="Scan"
-              Command="{Binding RescanCommand}"
-              Height="40"
-              HorizontalAlignment="Left"
-              Padding="20,0"/>
-
     </StackPanel>
   </ScrollViewer>
 </UserControl>

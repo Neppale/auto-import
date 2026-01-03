@@ -12,7 +12,7 @@ namespace AutoImportPlugin
         {
             get
             {
-                return _games.Where(g => g.IsSelected).ToList();
+                return _games.Where(game => game.IsSelected).ToList();
             }
         }
 

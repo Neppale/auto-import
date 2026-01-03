@@ -50,8 +50,6 @@ namespace AutoImportPlugin
 
             foreach (var path in Settings.BlockedPaths) BlockedPathsUI.Add(path);
 
-            RescanCommand = new RelayCommand(() => plugin.RunManualImport());
-
             RemoveBlockCommand = new RelayCommand<string>((path) =>
             {
                 if (path != null && BlockedPathsUI.Contains(path))

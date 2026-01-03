@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Text.RegularExpressions;
 
 namespace AutoImportPlugin
 {
@@ -29,21 +30,6 @@ namespace AutoImportPlugin
         public override IEnumerable<GameMetadata> GetGames(LibraryGetGamesArgs args)
         {
             return ScanAndSelectGames();
-        }
-
-        public void RunManualImport()
-        {
-            var games = ScanAndSelectGames();
-            if (games.Count > 0)
-            {
-                int addedCount = 0;
-                foreach (var gameData in games)
-                {
-                    var result = PlayniteApi.Database.ImportGame(gameData, this);
-                    if (result != null) addedCount++;
-                }
-                PlayniteApi.Dialogs.ShowMessage($"Successfully imported {addedCount} games.", "Scan Complete");
-            }
         }
 
         private string NormalizePath(string path)
@@ -107,11 +93,11 @@ namespace AutoImportPlugin
 
                 if (window.ShowDialog() == true)
                 {
-                    finalSelection = window.SelectedGames.Select(g => g.GameData).ToList();
+                    finalSelection = window.SelectedGames.Select(game => game.GameData).ToList();
 
                     var newlyIgnored = allFoundGames
-                        .Where(g => g.IsIgnored)
-                        .Select(g => g.ExecutablePath)
+                        .Where(game => game.IsIgnored)
+                        .Select(game => game.ExecutablePath)
                         .ToList();
 
                     if (newlyIgnored.Count > 0)
@@ -169,9 +155,11 @@ namespace AutoImportPlugin
                     if (IsGameExecutable(file))
                     {
                         var fileInfo = new FileInfo(file);
+                        string gameName = GetGameNameFromFolderOrExe(dirPath, fileInfo);
+
                         var metadata = new GameMetadata
                         {
-                            Name = Path.GetFileNameWithoutExtension(fileInfo.Name),
+                            Name = gameName,
                             GameId = fileInfo.FullName.GetHashCode().ToString(),
                             InstallDirectory = fileInfo.DirectoryName,
                             IsInstalled = true,
@@ -194,6 +182,54 @@ namespace AutoImportPlugin
             }
             catch { }
             return list;
+        }
+
+        private string GetGameNameFromFolderOrExe(string dirPath, FileInfo fileInfo)
+        {
+            // Try to get name from folder first
+            string folderName = Path.GetFileName(dirPath);
+            if (!string.IsNullOrWhiteSpace(folderName))
+            {
+                string cleanFolderName = CleanGameName(folderName);
+                if (IsValidGameName(cleanFolderName))
+                {
+                    return cleanFolderName;
+                }
+            }
+
+            // Fall back to exe file name
+            string rawExeName = Path.GetFileNameWithoutExtension(fileInfo.Name);
+            return CleanGameName(rawExeName);
+        }
+
+        private bool IsValidGameName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            
+            // Check if name is too short (likely not a real game name)
+            if (name.Length < 2) return false;
+
+            // Check for generic folder names that shouldn't be used
+            string lowerName = name.ToLowerInvariant();
+            string[] genericNames = { "bin", "game", "games", "exe", "exes", "program", "programs", 
+                                     "application", "applications", "software", "tools", "util", 
+                                     "utils", "temp", "tmp", "download", "downloads" };
+            
+            return !genericNames.Contains(lowerName);
+        }
+
+        private string CleanGameName(string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename)) return filename;
+
+            string clean = filename.Replace('.', ' ').Replace('_', ' ');
+
+            clean = Regex.Replace(clean, @"\[.*?\]|\(.*?\)", "");
+
+            string junkPattern = @"\bv?(\d+(\.\d+)+)\b|repack|goty|edition|remastered|x64|x86|build|setup|installer";
+            clean = Regex.Replace(clean, junkPattern, "", RegexOptions.IgnoreCase);
+
+            return Regex.Replace(clean, @"\s+", " ").Trim();
         }
 
         private bool IsGameExecutable(string path)
