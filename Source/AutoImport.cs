@@ -32,6 +32,40 @@ namespace AutoImportPlugin
             return ScanAndSelectGames();
         }
 
+        private HashSet<string> BuildExistingGamesSet()
+        {
+            var existingSet = new HashSet<string>();
+            try
+            {
+                foreach (var game in PlayniteApi.Database.Games)
+                {
+                    if (game.IsInstalled)
+                    {
+                        if (!string.IsNullOrEmpty(game.InstallDirectory))
+                            existingSet.Add(NormalizePath(game.InstallDirectory));
+
+                        if (game.GameActions != null)
+                        {
+                            foreach (var action in game.GameActions)
+                            {
+                                if (action.Type == GameActionType.File && !string.IsNullOrEmpty(action.Path))
+                                {
+                                    existingSet.Add(NormalizePath(action.Path));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Failed to build existing games set");
+                return new HashSet<string>();
+            }
+
+            return existingSet;
+        }
+
         private string NormalizePath(string path)
         {
             if (string.IsNullOrEmpty(path)) return string.Empty;
@@ -53,26 +87,7 @@ namespace AutoImportPlugin
                 }
             }
 
-            var existingSet = new HashSet<string>();
-            foreach (var game in PlayniteApi.Database.Games)
-            {
-                if (game.IsInstalled)
-                {
-                    if (!string.IsNullOrEmpty(game.InstallDirectory))
-                        existingSet.Add(NormalizePath(game.InstallDirectory));
-
-                    if (game.GameActions != null)
-                    {
-                        foreach (var action in game.GameActions)
-                        {
-                            if (action.Type == GameActionType.File && !string.IsNullOrEmpty(action.Path))
-                            {
-                                existingSet.Add(NormalizePath(action.Path));
-                            }
-                        }
-                    }
-                }
-            }
+            var existingSet = BuildExistingGamesSet();
 
             foreach (var folder in settings.Settings.ScanFolders)
             {
@@ -129,7 +144,10 @@ namespace AutoImportPlugin
                     results.AddRange(GetExecutablesInDir(subDir, blockedSet, existingSet));
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                logger.Warn(ex, $"Failed to scan subdirectories in: {rootPath}");
+            }
             return results;
         }
 
@@ -160,7 +178,7 @@ namespace AutoImportPlugin
                         var metadata = new GameMetadata
                         {
                             Name = gameName,
-                            GameId = fileInfo.FullName.GetHashCode().ToString(),
+                            GameId = fileInfo.FullName,
                             InstallDirectory = fileInfo.DirectoryName,
                             IsInstalled = true,
                             Platforms = new HashSet<MetadataProperty> { new MetadataSpecProperty("pc_windows") },
@@ -180,13 +198,15 @@ namespace AutoImportPlugin
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                logger.Warn(ex, $"Failed to scan directory for executables: {dirPath}");
+            }
             return list;
         }
 
         private string GetGameNameFromFolderOrExe(string dirPath, FileInfo fileInfo)
         {
-            // Try to get name from folder first
             string folderName = Path.GetFileName(dirPath);
             if (!string.IsNullOrWhiteSpace(folderName))
             {
@@ -197,7 +217,6 @@ namespace AutoImportPlugin
                 }
             }
 
-            // Fall back to exe file name
             string rawExeName = Path.GetFileNameWithoutExtension(fileInfo.Name);
             return CleanGameName(rawExeName);
         }
@@ -206,10 +225,8 @@ namespace AutoImportPlugin
         {
             if (string.IsNullOrWhiteSpace(name)) return false;
             
-            // Check if name is too short (likely not a real game name)
             if (name.Length < 2) return false;
 
-            // Check for generic folder names that shouldn't be used
             string lowerName = name.ToLowerInvariant();
             string[] genericNames = { "bin", "game", "games", "exe", "exes", "program", "programs", 
                                      "application", "applications", "software", "tools", "util", 

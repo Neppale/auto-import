@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
-using System.Windows.Input; // Required for ICommand
+using System.Windows.Input; 
 
 namespace AutoImportPlugin
 {
@@ -38,7 +38,6 @@ namespace AutoImportPlugin
 
         public ObservableCollection<string> BlockedPathsUI { get; set; } = new ObservableCollection<string>();
 
-        public RelayCommand RescanCommand { get; }
         public RelayCommand<string> RemoveBlockCommand { get; }
 
         public AutoImportSettingsViewModel(AutoImport plugin)
