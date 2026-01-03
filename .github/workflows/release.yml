@@ -55,11 +55,10 @@ jobs:
           Write-Host "Created archive: $archiveName"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          name: Release v${{ steps.get_version.outputs.version }}
-          files: ${{ steps.create_archive.outputs.archive_name }}
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: >-
+        gh release create ${{ github.ref_name }}
+        "${{ steps.create_archive.outputs.archive_name }}#AutoImport"
+        --generate-notes
+        --title "Version ${{ steps.get_version.outputs.version }}"
