@@ -62,5 +62,3 @@ jobs:
           "${{ steps.create_archive.outputs.archive_name }}#AutoImport"
           --generate-notes
           --title "Version ${{ steps.get_version.outputs.version }}"
-        permissions:
-          contents: write
