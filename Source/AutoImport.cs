@@ -252,7 +252,7 @@ namespace AutoImportPlugin
         private bool IsGameExecutable(string path)
         {
             string fileName = Path.GetFileName(path).ToLower();
-            return !(fileName.Contains("uninstall") || fileName.Contains("setup") || fileName.Contains("config") || fileName.Contains("crash"));
+            return !(fileName.Contains("uninstall") || fileName.Contains("unins0") || fileName.Contains("setup") || fileName.Contains("config") || fileName.Contains("crash"));
         }
     }
 }
