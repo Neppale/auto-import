@@ -60,7 +60,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >-
-          gh release create ${{ github.ref_name }}
+          gh release create ${{ steps.get_version.outputs.version }}
           "${{ steps.create_archive.outputs.archive_name }}#AutoImport"
           --generate-notes
-          --title "v${{ steps.get_version.outputs.version }}"
+          --title "${{ steps.get_version.outputs.version }}"
