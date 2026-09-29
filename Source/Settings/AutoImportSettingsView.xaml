@@ -24,7 +24,13 @@
       <TextBlock Text="Scans root and immediate subfolders only."
                  FontStyle="Italic" Foreground="Gray" Margin="0,5,0,20"/>
 
-      <TextBlock Text="These files will be ignored in future scans:" Margin="0,0,0,5"/>
+      <TextBlock Text="Blocked paths and file-name Regex patterns (i.e. unins\d+):" Margin="0,0,0,5"/>
+
+      <DockPanel Margin="0,0,0,5">
+        <Button Content="Add" DockPanel.Dock="Right" Margin="8,0,0,0" Padding="10,3"
+                Command="{Binding AddBlockCommand}"/>
+        <TextBox Text="{Binding NewBlockEntry, UpdateSourceTrigger=PropertyChanged}"/>
+      </DockPanel>
 
       <ListBox ItemsSource="{Binding BlockedPathsUI}"
                Height="150"

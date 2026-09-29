@@ -79,11 +79,26 @@ namespace AutoImportPlugin
             if (settings.Settings.ScanFolders == null) return new List<GameMetadata>();
 
             var blockedSet = new HashSet<string>();
+            var ignorePatterns = new List<Regex>();
             if (settings.Settings.BlockedPaths != null)
             {
-                foreach (var path in settings.Settings.BlockedPaths)
+                foreach (var entry in settings.Settings.BlockedPaths)
                 {
-                    blockedSet.Add(NormalizePath(path));
+                    if (string.IsNullOrWhiteSpace(entry)) continue;
+                    if (Path.IsPathRooted(entry))
+                    {
+                        blockedSet.Add(NormalizePath(entry));
+                        continue;
+                    }
+
+                    try
+                    {
+                        ignorePatterns.Add(new Regex(entry, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(250)));
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        logger.Warn(ex, $"Skipping invalid block pattern: {entry}");
+                    }
                 }
             }
 
@@ -93,7 +108,7 @@ namespace AutoImportPlugin
             {
                 if (Directory.Exists(folder))
                 {
-                    allFoundGames.AddRange(ScanFolderLimited(folder, blockedSet, existingSet));
+                    allFoundGames.AddRange(ScanFolderLimited(folder, blockedSet, existingSet, ignorePatterns));
                 }
             }
 
@@ -132,16 +147,16 @@ namespace AutoImportPlugin
             return finalSelection;
         }
 
-        private IEnumerable<ScannedGameWrapper> ScanFolderLimited(string rootPath, HashSet<string> blockedSet, HashSet<string> existingSet)
+        private IEnumerable<ScannedGameWrapper> ScanFolderLimited(string rootPath, HashSet<string> blockedSet, HashSet<string> existingSet, List<Regex> ignorePatterns)
         {
             var results = new List<ScannedGameWrapper>();
-            results.AddRange(GetExecutablesInDir(rootPath, blockedSet, existingSet));
+            results.AddRange(GetExecutablesInDir(rootPath, blockedSet, existingSet, ignorePatterns));
 
             try
             {
                 foreach (var subDir in Directory.GetDirectories(rootPath))
                 {
-                    results.AddRange(GetExecutablesInDir(subDir, blockedSet, existingSet));
+                    results.AddRange(GetExecutablesInDir(subDir, blockedSet, existingSet, ignorePatterns));
                 }
             }
             catch (Exception ex)
@@ -151,7 +166,7 @@ namespace AutoImportPlugin
             return results;
         }
 
-        private IEnumerable<ScannedGameWrapper> GetExecutablesInDir(string dirPath, HashSet<string> blockedSet, HashSet<string> existingSet)
+        private IEnumerable<ScannedGameWrapper> GetExecutablesInDir(string dirPath, HashSet<string> blockedSet, HashSet<string> existingSet, List<Regex> ignorePatterns)
         {
             var list = new List<ScannedGameWrapper>();
             try
@@ -164,6 +179,24 @@ namespace AutoImportPlugin
 
                     bool isIgnored = blockedSet.Contains(normalizedFile) || blockedSet.Contains(normalizedDir);
                     if (isIgnored) continue;
+
+                    bool isIgnoredPattern = false;
+                    foreach (var pattern in ignorePatterns)
+                    {
+                        try
+                        {
+                            if (pattern.IsMatch(Path.GetFileName(file)))
+                            {
+                                isIgnoredPattern = true;
+                                break;
+                            }
+                        }
+                        catch (RegexMatchTimeoutException) { }
+                    }
+                    if (isIgnoredPattern) continue;
+
+
+
 
                     bool alreadyExists = existingSet.Contains(normalizedFile) || existingSet.Contains(normalizedDir);
                     if (alreadyExists) continue;
@@ -190,7 +223,8 @@ namespace AutoImportPlugin
                                     Type = GameActionType.File,
                                     Path = fileInfo.FullName,
                                     WorkingDir = fileInfo.DirectoryName,
-                                    Name = "Play"
+                                    Name = "Play",
+                                    IsPlayAction = true
                                 }
                             }
                         };
@@ -224,14 +258,14 @@ namespace AutoImportPlugin
         private bool IsValidGameName(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return false;
-            
+
             if (name.Length < 2) return false;
 
             string lowerName = name.ToLowerInvariant();
-            string[] genericNames = { "bin", "game", "games", "exe", "exes", "program", "programs", 
-                                     "application", "applications", "software", "tools", "util", 
+            string[] genericNames = { "bin", "game", "games", "exe", "exes", "program", "programs",
+                                     "application", "applications", "software", "tools", "util",
                                      "utils", "temp", "tmp", "download", "downloads" };
-            
+
             return !genericNames.Contains(lowerName);
         }
 
