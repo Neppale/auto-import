@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Data;
 using System.Windows.Input; 
 
@@ -38,7 +40,11 @@ namespace AutoImportPlugin
 
         public ObservableCollection<string> BlockedPathsUI { get; set; } = new ObservableCollection<string>();
 
+        private string newBlockEntry;
+        public string NewBlockEntry { get => newBlockEntry; set => SetValue(ref newBlockEntry, value); }
+
         public RelayCommand<string> RemoveBlockCommand { get; }
+        public RelayCommand AddBlockCommand { get; }
 
         public AutoImportSettingsViewModel(AutoImport plugin)
         {
@@ -55,6 +61,25 @@ namespace AutoImportPlugin
                 {
                     BlockedPathsUI.Remove(path);
                 }
+            });
+
+            AddBlockCommand = new RelayCommand(() =>
+            {
+                var entry = NewBlockEntry?.Trim();
+                if (string.IsNullOrEmpty(entry) || BlockedPathsUI.Contains(entry)) return;
+
+                if (!Path.IsPathRooted(entry))
+                {
+                    try { _ = new Regex(entry, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)); }
+                    catch (ArgumentException)
+                    {
+                        plugin.PlayniteApi.Dialogs.ShowErrorMessage($"Invalid pattern: {entry}", "AutoImport");
+                        return;
+                    }
+                }
+
+                BlockedPathsUI.Add(entry);
+                NewBlockEntry = string.Empty;
             });
         }
 

@@ -63,4 +63,4 @@ jobs:
           gh release create ${{ github.ref_name }}
           "${{ steps.create_archive.outputs.archive_name }}#AutoImport"
           --generate-notes
-          --title "Version ${{ steps.get_version.outputs.version }}"
+          --title "v${{ steps.get_version.outputs.version }}"
