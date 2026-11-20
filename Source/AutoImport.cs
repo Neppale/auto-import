@@ -69,7 +69,21 @@ namespace AutoImportPlugin
         private string NormalizePath(string path)
         {
             if (string.IsNullOrEmpty(path)) return string.Empty;
-            return path.ToLowerInvariant().Trim().Replace("/", "\\");
+
+            string p = path.Trim().Replace("/", "\\");
+            if (p.Length == 0) return string.Empty;
+
+            // "d:" alone means "current folder on drive D", treat it as the drive root
+            if (p.Length == 2 && p[1] == ':') p += "\\";
+
+            // Resolve to a full path so "d:Utilities\patcher.exe" and "D:\Utilities\patcher.exe" compare equal
+            try { p = Path.GetFullPath(p); } catch { }
+
+            // Drop a trailing backslash ("d:\utilities\" -> "d:\utilities"), but keep a drive root like "d:\"
+            string root = Path.GetPathRoot(p) ?? string.Empty;
+            if (p.Length > root.Length) p = p.TrimEnd('\\');
+
+            return p.ToLowerInvariant();
         }
 
         private List<GameMetadata> ScanAndSelectGames()
@@ -104,8 +118,12 @@ namespace AutoImportPlugin
 
             var existingSet = BuildExistingGamesSet();
 
-            foreach (var folder in settings.Settings.ScanFolders)
+            foreach (var rawFolder in settings.Settings.ScanFolders)
             {
+                var folder = rawFolder?.Trim();
+                if (string.IsNullOrEmpty(folder)) continue;
+                if (folder.Length == 2 && folder[1] == ':') folder += "\\";
+
                 if (Directory.Exists(folder))
                 {
                     allFoundGames.AddRange(ScanFolderLimited(folder, blockedSet, existingSet, ignorePatterns));
